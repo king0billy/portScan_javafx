@@ -14,8 +14,7 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-public class SearchPort  extends JFrame implements ActionListener
-{
+public class SearchPort  extends JFrame implements ActionListener {
     private static JTextArea jta;
     private JScrollPane js;
     private JTextField jt1,jt2,jt3,jt4;
@@ -406,4 +405,5 @@ public class SearchPort  extends JFrame implements ActionListener
         }
 
     }
+
 }

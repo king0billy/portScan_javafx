@@ -14,7 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 public final class JdbcUtils {
-    private static String url = "jdbc:mysql://localhost:3306/portInfo?useUnicode=true&characterEncoding=utf8";
+    private static String url = "jdbc:mysql://localhost:3306/iana_default?useUnicode=true&characterEncoding=utf8";
     private static String user = "root";
     private static String psw = "123456";
     private static  Connection conn;
