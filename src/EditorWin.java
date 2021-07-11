@@ -118,17 +118,17 @@ public class EditorWin extends JFrame {
                                 sb.append("开放的端口如下："+"\n");
                                 oneTask.updateTitle(f_startIp.getText());
                                 oneTask.updateMessage(sb.toString());
-                                for(int i = startPort;!oneTask.isCancelled()&&i <= endPort; i++) {
+                                for(int i = startPort;!oneTask.isCancelled()&&i <= endPort;i += portOfThread) {
                                     if((i + portOfThread) <= endPort) {
                                         count=i;
                                         new Scan(i, i + portOfThread,startIpStr).start();
                                         updateValue((count-startPort)/(endPort-startPort));
                                         //System.out.println((i-startPort)+" "+(endPort-startPort));
-                                        i += portOfThread;
+                                        //i += portOfThread;
                                     }
                                     else {
                                         new Scan(i, endPort,startIpStr).start();
-                                        i += portOfThread;
+                                       // i += portOfThread;
                                     }
                                 }
                             }else{
@@ -171,7 +171,6 @@ public class EditorWin extends JFrame {
         }
     }
     public  void initialize(){
-        //IPStatus.textProperty().bind(f_startPort.textProperty());
          oneTask.progressProperty().addListener(new ChangeListener<Number>() {
              @Override
              public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
@@ -200,8 +199,10 @@ public class EditorWin extends JFrame {
     }
     @FXML void EventOnScan (javafx.event.ActionEvent event){
         oneTask=new OneTask();
-        innerBlock.portCount=0;
-        innerBlock.IPCount=1;
+        synchronized (innerBlock){
+            innerBlock.portCount=0;
+            innerBlock.IPCount=1;
+        }
         initialize();
         //progressBarOfAll
         Thread th = new Thread(oneTask);
@@ -213,7 +214,6 @@ public class EditorWin extends JFrame {
     //todo task 扫描端口地址的线程
     class Scan extends Thread{
         int maxPort, minPort;
-        int getLockTag=0;
         String Ip;
         Scan(int minPort, int maxPort,String Ip){
             this.minPort=minPort ;
@@ -232,17 +232,14 @@ public class EditorWin extends JFrame {
                     System.out.println(i+"端口开放了");
                     oneTask.updateMessage(sb.toString());
                     socket.close();
-                } catch (Exception e) {
+                } catch (Exception e) {//包括jdbc
                     //System.out.println(i+"端口没开放");
                 }
-                while(getLockTag==0){
                     synchronized(innerBlock){
                         innerBlock.portCount++;
                         System.out.println(innerBlock.portCount+" "+(startPort-endPort));
                         oneTask.updateProgress(innerBlock.portCount,innerBlock.IPCount*(endPort-startPort));
-                        getLockTag++;
                     }
-                }
                 int finalI = i;
                 Platform.runLater(() -> status.setText(String.valueOf(finalI)));//"正在扫描"+
             }
@@ -282,7 +279,7 @@ public class EditorWin extends JFrame {
     }
     //根据端口号，查询数据库中端口号的相应信息并显示在文本域之中
     synchronized void findInfoByPort(int port,String Ip){
-        sb.append("-----------------------"+"Ip"+Ip+"的"+"端口号"+port+"------------------------------------"+"\n");
+        sb.append("-----------------------"+"Ip"+Ip+"的端口号"+port+"------------------------------------"+"\n");
         Connection conn ;
         PreparedStatement pst  ;
         ResultSet rs  ;
