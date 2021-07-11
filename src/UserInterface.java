@@ -109,55 +109,47 @@ public class UserInterface {
                                         append("\t").append("开启的线程数:").append(threadNumber).append("\n");
                                 sb.append("端口起点:").append(startPort).append("\t端口终点:").append(endPort).append("\n");
                                 sb.append("有下面这些开放的端口："+"\n");
-                                oneTask.updateTitle(IPStartField.getText());
-                                //oneTask.updateMessage(sb.toString());
+                                oneTask.updateTitle(IPStartField.getText());//oneTask.updateMessage(sb.toString());
                                 for(int i = startPort;!oneTask.isCancelled()&&i <= endPort;i += portOfPerThread) {
                                     if((i + portOfPerThread) <= endPort) {
                                         count=i;
-                                        new ScanIP(i, i + portOfPerThread, IPStartString).start();
-                                        System.out.println((count-startPort)*1.0/(endPort-startPort));
+                                        new ScanIP(i, i + portOfPerThread, IPStartString).start();//System.out.println((count-startPort)*1.0/(endPort-startPort));
                                         updateValue((count-startPort)*1.0/(endPort-startPort));//更新线程进度条用
                                     }
-                                    else {
-                                        new ScanIP(i, endPort, IPStartString).start();
-                                    }
+                                    else { new ScanIP(i, endPort, IPStartString).start(); }
                                 }
                             }else{
                                 String IPEndString = IPEndField.getText();
                                 if(checkLegality(IPEndString)){//扫描Ip地址段
-                                    Set<Object> ipSet = new HashSet<>() ;
+                                    Set<Object> IPSet = new HashSet<>() ;
                                     start = Integer.parseInt(IPStartString.split("\\.")[3]);
                                     end = Integer.parseInt(IPEndString.split("\\.")[3]);
                                     String starts = IPStartString.split("\\.")[0]+"."+
                                             IPStartString.split("\\.")[1]+"."+
                                             IPStartString.split("\\.")[2];//IP地址根据"."划分成了4块
-                                    if(start>end){
-                                        updateMessage("请输入正确的Ip地址");
-                                    }
+                                    if(start>end){ updateMessage("请输入正确的Ip地址"); }
                                     else{
                                         for(int i = start;i<=end;i++){
-                                            ipSet.add(starts+"."+i) ;    //地海段的每个地址存入集合
+                                            IPSet.add(starts+"."+i) ;    //地海段的每个地址存入集合
                                         }
-                                        for (Object str : ipSet) {
+                                        for (Object str : IPSet) {
                                             new ScanIPBlock(str.toString()).start() ;
                                             System.out.println(count*1.0/(end-start));
                                             updateValue(count*1.0/(end-start));//更新线程进度条用
                                             count++;
                                         }
                                     }
-                                }else{
-                                    updateMessage("请输入正确的Ip地址");
-                                }
+                                }else{ updateMessage("请输入正确的Ip地址"); }
                             }
                         }
                     }
                 }
                 catch(NumberFormatException e1){
-                    updateMessage("错误的端口号或端口号和线程数必须为整数");pop("错误的端口号或端口号和线程数必须为整数") ;
+                    updateMessage("错误的端口号或端口号和线程数必须为整数");
                 }
             }
             else{
-                updateMessage("请输入正确的Ip地址");pop("请输入正确的Ip地址") ;
+                updateMessage("请输入正确的Ip地址");
             }
             System.out.println("call结束了");
             if(IPEndField.getText().equals(""))return 1.0*(count-startPort)/(endPort-startPort);
@@ -169,9 +161,6 @@ public class UserInterface {
             progressBarOfAll.setProgress(t1.doubleValue());
             output.setText(sb.toString());
         });
-//        oneTask.messageProperty().addListener((observableValue, s, t1) -> output.setText(sb.toString()));
-        oneTask.titleProperty().addListener((observableValue, s, t1) -> IPStatus.setText(t1));
-
         oneTask.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
@@ -181,10 +170,10 @@ public class UserInterface {
         oneTask.messageProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
-                //output.setText(sb.toString());
                 pop(t1);
             }
         });
+        oneTask.titleProperty().addListener((observableValue, s, t1) -> IPStatus.setText(t1));
     }
     @FXML void EventOnScan (javafx.event.ActionEvent event){
         oneTask.cancel();
@@ -235,6 +224,7 @@ public class UserInterface {
             this.IP = IP ;
         }
         public synchronized void run(){
+            //public synchronized void run(){
             try {
                 for(int i = startPort;i <= endPort;i += portOfPerThread) {
                     if(tagOfIPCount==0){                    //扫描开放的Ip
@@ -288,8 +278,12 @@ public class UserInterface {
         }
     }
     // 判断输入的IP是否合法
-    private boolean checkLegality(String str) {//字符串里面\要变\\,|的优先级最低
-//        Pattern pattern = Pattern
+    private boolean checkLegality(String str) {//字符串里面\要变\\,|的优先级最低,中间不能有空格
+        Pattern pattern = Pattern
+                .compile("^((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}$");
+        return pattern.matcher(str).matches();
+    }
+    //        Pattern pattern = Pattern
 //                .compile("^((\\d" +
 //                        "|[1-9]\\d" +
 //                        "|1\\d\\d" +
@@ -300,12 +294,7 @@ public class UserInterface {
 //                        "{3}(\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5]|[*])$");
 //        Pattern pattern = Pattern
 //                .compile("^((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2}) (\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}$");
-        Pattern pattern = Pattern
-                .compile("^((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}$");
-        //正则表达式中间不能有空格
-        return pattern.matcher(str).matches();
-    }
-
+// 正则表达式中间不能有空格
     public static void  pop(String string) {
         Label lbl = new Label("Hint！");
         TextArea textArea=new TextArea(string);
@@ -345,23 +334,16 @@ public class UserInterface {
             Process p = Runtime.getRuntime().exec(www);  //调用系统命令符
             br = new BufferedReader(new InputStreamReader(p.getInputStream()));    //截取命令符返回的信息
             String line ;
-            StringBuilder sb = new StringBuilder();  //字符串变量非线程
-//                while ((line = new String(br.readLine().getBytes(),"gbk")) .equals("")!=false) {
-//                    sb.append(line + "\n");  //如果返回值为空，连接一个字符串到末尾
-//                }
+            StringBuilder sb = new StringBuilder();  //字符串变量线程安全的
             while ((line = br.readLine()) != null) {
                 sb.append(line).append("\n");  //如果返回值为空，连接一个字符串到末尾
             }
-            //String ss=new String(br.toString().getBytes(),"GBK"); //转码UTF8
             String ss=new String(sb.toString().getBytes(),"gbk"); //转码gbk
-            //String ss=new String(sb.toString().getBytes("ISO-8859-1"),"utf-8"); //转码UTF8
             pop(ss.toString());
-            //pop(sb.toString());
         } catch (Exception ev) {
             ev.printStackTrace();
         } finally {
-            if (br != null)  //如果返回值不为空则关闭br
-            {
+            if (br != null) {//如果返回值不为空则关闭br
                 try {
                     br.close();
                 } catch (Exception ev) {
@@ -370,6 +352,13 @@ public class UserInterface {
             }
         }
     }
+    //                while ((line = new String(br.readLine().getBytes(),"gbk")) .equals("")!=false) {
+//                    sb.append(line + "\n");  //如果返回值为空，连接一个字符串到末尾
+//                }
+    //String ss=new String(br.toString().getBytes(),"GBK"); //转码UTF8
+
+    //String ss=new String(sb.toString().getBytes("ISO-8859-1"),"utf-8"); //转码UTF8
+    //pop(sb.toString());
     @FXML void EventOnClear (javafx.event.ActionEvent event) {
         output.clear();
         sb.delete(0,sb.length()-1);

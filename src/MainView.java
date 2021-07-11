@@ -3,11 +3,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
-import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.net.UnknownHostException;
 
 /**
@@ -25,12 +21,12 @@ import java.net.UnknownHostException;
 //        new UserInterface();
 //    }
 //}
-public class MainView extends Application {
-    public static void main(String[] args) throws UnknownHostException {
 //        System.out.println(InetAddress.getByName("www.baidu.com").getHostName());
 //        System.out.println(InetAddress.getByName("www.baidu.com").getHostAddress());
 //        System.out.println(InetAddress.getByName("www.baidu.com").getHostAddress());
-        //System.out.println(InetAddress.getByName("10.30.18.143").getHostName());
+//System.out.println(InetAddress.getByName("10.30.18.143").getHostName());
+public class MainView extends Application {
+    public static void main(String[] args) throws UnknownHostException {
         launch(args);
     }
     @Override
