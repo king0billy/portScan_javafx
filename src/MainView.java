@@ -22,19 +22,22 @@ import java.net.UnknownHostException;
 
 //public class PortScanner{
 //    public static void main(String[] args){
-//        new EditorWin();
+//        new UserInterface();
 //    }
 //}
-public class PortScanner extends Application {
+public class MainView extends Application {
     public static void main(String[] args) throws UnknownHostException {
-        System.out.println("本机\"IP\"地址："+ InetAddress.getLocalHost());
+//        System.out.println(InetAddress.getByName("www.baidu.com").getHostName());
+//        System.out.println(InetAddress.getByName("www.baidu.com").getHostAddress());
+//        System.out.println(InetAddress.getByName("www.baidu.com").getHostAddress());
+        //System.out.println(InetAddress.getByName("10.30.18.143").getHostName());
         launch(args);
     }
     @Override
     public void start(Stage primaryStage) throws IOException {
-        Parent root= FXMLLoader.load(getClass().getResource("EditorWin.fxml"));
+        Parent root= FXMLLoader.load(getClass().getResource("UserInterface.fxml"));
         Scene scene=new Scene(root);
-        primaryStage.setTitle("多线程端口扫描器");
+        primaryStage.setTitle("java多线程端口扫描器");
         primaryStage.setScene(scene);
         primaryStage.show();
     }

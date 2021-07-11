@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UserInterface">
+   <children>
+      <Button fx:id="startScanner" layoutX="1285.0" layoutY="65.0" mnemonicParsing="false" onAction="#EventOnScan" text="扫描" />
+      <Button fx:id="export" layoutX="1285.0" layoutY="705.0" mnemonicParsing="false" onAction="#EventOnExport" text="导出到" />
+      <Button fx:id="searchIp" layoutX="252.0" layoutY="705.0" mnemonicParsing="false" onAction="#EventOnGetIp" text="查询域名ip" />
+      <TextArea fx:id="output" layoutX="19.0" layoutY="103.0" prefHeight="595.0" prefWidth="1328.0" />
+      <TextField fx:id="IPEndField" layoutX="346.0" layoutY="65.0" promptText="不填则默认扫前面一个主机" />
+      <TextField fx:id="PortStartField" layoutX="674.0" layoutY="65.0" prefHeight="30.0" prefWidth="94.0" promptText="最低0" text="0" />
+      <TextField fx:id="PortEndField" layoutX="790.0" layoutY="65.0" prefHeight="30.0" prefWidth="94.0" promptText="最高65535" text="65535" />
+      <TextField fx:id="IPStartField" layoutX="125.0" layoutY="65.0" promptText="ipv4地址" text="127.0.0.1" />
+      <TextField fx:id="portNumberOfPerThreadField" layoutX="1078.0" layoutY="65.0" promptText="每个线程扫多少个端口" text="2" />
+      <TextField fx:id="domainName" layoutX="24.0" layoutY="705.0" promptText="域名" text="www.baidu.com" />
+      <Label layoutX="778.0" layoutY="70.0" text="~" />
+      <Label layoutX="555.0" layoutY="70.0" prefHeight="20.0" prefWidth="116.0" text="扫描的端口范围:" />
+      <Label layoutX="327.0" layoutY="70.0" prefHeight="20.0" prefWidth="20.0" text="~" />
+      <Label layoutX="24.0" layoutY="70.0" prefHeight="20.0" prefWidth="107.0" text="扫描的ip范围:" />
+      <Label fx:id="portStatus" layoutX="643.0" layoutY="708.0" prefHeight="30.0" prefWidth="107.0" text="." />
+      <ProgressBar fx:id="progressBarOfAll" layoutX="859.0" layoutY="712.0" prefHeight="23.0" prefWidth="174.0" progress="0.0" />
+      <Button fx:id="clearArea" layoutX="1048.0" layoutY="706.0" mnemonicParsing="false" onAction="#EventOnClear" text="清空log(不可恢复!)" />
+      <Label fx:id="status1" layoutX="576.0" layoutY="708.0" prefHeight="30.0" prefWidth="80.0" text="当前端口:" />
+      <Label fx:id="status11" layoutX="367.0" layoutY="708.0" prefHeight="30.0" prefWidth="80.0" text="当前IP:" />
+      <Label fx:id="IPStatus" layoutX="428.0" layoutY="708.0" prefHeight="30.0" prefWidth="137.0" text="." />
+      <Label layoutX="758.0" layoutY="708.0" prefHeight="30.0" prefWidth="94.0" text="已扫描端口:" />
+      <ProgressBar fx:id="progressBarOfThread" layoutX="1079.0" layoutY="28.0" prefWidth="200.0" progress="0.0" />
+      <Label fx:id="portStatus1" layoutX="914.0" layoutY="65.0" prefHeight="30.0" prefWidth="158.0" text="每个线程扫多少个端口:" />
+      <Label fx:id="portStatus11" layoutX="914.0" layoutY="25.0" prefHeight="30.0" prefWidth="158.0" text="已开启线程进度:" />
+   </children>
+</AnchorPane>

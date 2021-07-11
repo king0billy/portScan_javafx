@@ -16,10 +16,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -28,7 +24,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -40,30 +35,29 @@ import java.util.regex.Pattern;
  * @Date: 2021/7/8 12:53
  * @since version-0.0
  */
-public class EditorWin extends JFrame {
-    static final class InnerBlock{
+public class UserInterface {
+    static final class class4Count{
         long portCount=0;
         long IPCount=1;
     }
-    static final InnerBlock innerBlock=new InnerBlock();
-    private String startIpStr ,endIpStr;
-    private int startPort,endPort,portOfThread ,threadNum;
+    static final class4Count class4Count=new class4Count();
+    private int startPort;private int endPort;
+    private int portOfPerThread;
     StringBuffer sb=new StringBuffer();//synchronized的
     OneTask oneTask=new OneTask();
     @FXML Button clearArea;
     @FXML Button startScanner;
     @FXML Button export;
     @FXML Button searchIp;
-    @FXML Button cancelScan;
-    @FXML TextField f_startIp;
-    @FXML TextField f_endIp;
-    @FXML TextField f_startPort;
-    @FXML TextField f_endPort;
-    @FXML TextField f_portOfThread;
+    @FXML TextField IPStartField;
+    @FXML TextField IPEndField;
+    @FXML TextField PortStartField;
+    @FXML TextField PortEndField;
+    @FXML TextField portNumberOfPerThreadField;
     @FXML TextField domainName;
-    @FXML Label status;
+    @FXML Label portStatus;
     @FXML Label IPStatus;
-    @FXML TextArea message;
+    @FXML TextArea output;
     @FXML ProgressBar progressBarOfAll;
     @FXML ProgressBar progressBarOfThread;
     class OneTask extends Task<Number>{
@@ -94,52 +88,50 @@ public class EditorWin extends JFrame {
 
         @Override
         protected Number call() throws Exception {
-            startIpStr = f_startIp.getText().trim() ;   //得到输入的Ip
+            String IPStartString = IPStartField.getText().trim();   //得到输入的Ip
             int count=0;
-            if(checkIP(startIpStr)){//判断是否为数字
+            int start =2;int end=3;//int re4return;
+            if(checkLegality(IPStartString)){//判断是否为数字
                 try{
-                    startPort = Integer.parseInt(f_startPort.getText().trim()) ;
-                    endPort =  Integer.parseInt(f_endPort.getText().trim()) ;
-                    portOfThread  =Integer.parseInt(f_portOfThread.getText().trim())  ;
-                    threadNum = (endPort-startPort)/portOfThread+1 ;
+                    startPort = Integer.parseInt(PortStartField.getText().trim()) ;
+                    endPort =  Integer.parseInt(PortEndField.getText().trim()) ;
+                    portOfPerThread  =Integer.parseInt(portNumberOfPerThreadField.getText().trim())  ;
+                    int threadNumber = (endPort - startPort) / portOfPerThread + 1;
                     //判断端口号的范围
                     if(startPort<0||endPort>65535||startPort>endPort){
                         pop("端口号范围：0~65535,并且最大端口号应大于最小端口号！") ;
                     }
                     else{
-                        if(portOfThread>endPort-startPort||portOfThread<1){
+                        if(portOfPerThread>endPort-startPort||portOfPerThread<1){
                             pop("每个线程扫描的端口数不能大于所有的端口数且不能小于1") ;
                         }else{
-                            if(f_endIp.getText().equals("")){         //if(((String) comboBox.getSelectedItem()).equals("地址")){
-                                sb.append("************************************************************"+"\n");
-                                sb.append("正在扫描  "+startIpStr+"          每个线程扫描端口个数"+portOfThread+"\n"+"开启的线程数"+threadNum+"\n");
-                                sb.append("开始端口  "+startPort+"         结束端口" +endPort+"\n");
-                                sb.append("主机名:"+getHostname(startIpStr)+"\n");
-                                sb.append("开放的端口如下："+"\n");
-                                oneTask.updateTitle(f_startIp.getText());
+                            if(IPEndField.getText().equals("")){         //if(((String) comboBox.getSelectedItem()).equals("地址")){
+                                sb.append("#######################################################################"+"\n");
+                                sb.append("正在扫描:"+ IPStartString +"\t\t每个线程扫描端口个数:"+portOfPerThread+"\t"+"开启的线程数:"+ threadNumber +"\n");
+                                sb.append("端口起点:"+startPort+"\t端口终点:" +endPort+"\n");
+                                sb.append("有下面这些开放的端口："+"\n");
+                                oneTask.updateTitle(IPStartField.getText());
                                 oneTask.updateMessage(sb.toString());
-                                for(int i = startPort;!oneTask.isCancelled()&&i <= endPort;i += portOfThread) {
-                                    if((i + portOfThread) <= endPort) {
+                                for(int i = startPort;!oneTask.isCancelled()&&i <= endPort;i += portOfPerThread) {
+                                    if((i + portOfPerThread) <= endPort) {
                                         count=i;
-                                        new Scan(i, i + portOfThread,startIpStr).start();
-                                        updateValue((count-startPort)/(endPort-startPort));
-                                        //System.out.println((i-startPort)+" "+(endPort-startPort));
-                                        //i += portOfThread;
+                                        new ScanIP(i, i + portOfPerThread, IPStartString).start();
+                                        System.out.println((count-startPort)*1.0/(endPort-startPort));
+                                        updateValue((count-startPort)*1.0/(endPort-startPort));
                                     }
                                     else {
-                                        new Scan(i, endPort,startIpStr).start();
-                                       // i += portOfThread;
+                                        new ScanIP(i, endPort, IPStartString).start();
                                     }
                                 }
                             }else{
-                                endIpStr = f_endIp.getText() ;
-                                if(checkIP(endIpStr)){
+                                String IPEndString = IPEndField.getText();
+                                if(checkLegality(IPEndString)){
                                     //扫描Ip地址段
                                     Set ipSet = new HashSet<Object>() ;
-                                    int start = Integer.valueOf(startIpStr.split("\\.")[3]);
-                                    int end = Integer.valueOf(endIpStr.split("\\.")[3]);
+                                    start = Integer.valueOf(IPStartString.split("\\.")[3]);
+                                    end = Integer.valueOf(IPEndString.split("\\.")[3]);
 
-                                    String starts = startIpStr.split("\\.")[0]+"."+startIpStr.split("\\.")[1]+"."+startIpStr.split("\\.")[2];
+                                    String starts = IPStartString.split("\\.")[0]+"."+ IPStartString.split("\\.")[1]+"."+ IPStartString.split("\\.")[2];
                                     //生成IP地址
                                     if(start>end){pop("请输入正确的Ip地址") ;}
                                     else{
@@ -147,9 +139,10 @@ public class EditorWin extends JFrame {
                                             ipSet.add(starts+"."+i) ;    //地海段的每个地址存入集合
                                         }
                                         for (Object str : ipSet) {
-                                            new ScanIp(str.toString()).start() ;
+                                            new ScanIPBlock(str.toString()).start() ;
+                                            System.out.println(count*1.0/(end-start));
+                                            updateValue(count*1.0/(end-start));
                                             count++;
-                                            updateValue((count-startPort)/(endPort-startPort));
                                         }
                                     }
                                 }else{
@@ -167,7 +160,8 @@ public class EditorWin extends JFrame {
                 pop("请输入正确的Ip地址") ;
             }
             System.out.println("call结束了");
-            return (count-startPort)/(endPort-startPort);
+            if(IPEndField.getText().equals(""))return 1.0*(count-startPort)/(endPort-startPort);
+            else return count*1.0/(end-start);
         }
     }
     public  void initialize(){
@@ -175,13 +169,13 @@ public class EditorWin extends JFrame {
              @Override
              public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
                  progressBarOfAll.setProgress(t1.doubleValue());
-                 message.setText(sb.toString());
+                 output.setText(sb.toString());
              }
          });
         oneTask.messageProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
-                message.setText(sb.toString());
+                output.setText(sb.toString());
             }
         });
         oneTask.titleProperty().addListener(new ChangeListener<String>() {
@@ -198,95 +192,90 @@ public class EditorWin extends JFrame {
         });
     }
     @FXML void EventOnScan (javafx.event.ActionEvent event){
+        oneTask.cancel();
         oneTask=new OneTask();
-        synchronized (innerBlock){
-            innerBlock.portCount=0;
-            innerBlock.IPCount=1;
+        synchronized (class4Count){
+            class4Count.portCount=0;
+            class4Count.IPCount=1;
         }
         initialize();
-        //progressBarOfAll
         Thread th = new Thread(oneTask);
         //th.setDaemon(true);
         th.start();
-//        System.out.println("草泥马"+sb);
-//        pop("扫描结束");
     }
     //todo task 扫描端口地址的线程
-    class Scan extends Thread{
+    class ScanIP extends Thread{
         int maxPort, minPort;
-        String Ip;
-        Scan(int minPort, int maxPort,String Ip){
+        String IP;
+        ScanIP(int minPort, int maxPort,String IP){
             this.minPort=minPort ;
             this.maxPort=maxPort ;
-            this.Ip=Ip;
+            this.IP=IP;
         }
-        @SuppressWarnings("unchecked")
         public  void run() {
             Socket socket = null ;
             for(int i = minPort;i<maxPort;i++){
                 try {
-                    socket=new Socket(Ip, i);
+                    socket=new Socket(IP, i);
                     //todo
-                    findInfoByPort(i ,Ip);//通过端口号调用数据库信息
+                    queryInDataBase(i ,IP);//通过端口号调用数据库信息
                     sb.append("\n");
                     System.out.println(i+"端口开放了");
                     oneTask.updateMessage(sb.toString());
                     socket.close();
-                } catch (Exception e) {//包括jdbc
-                    //System.out.println(i+"端口没开放");
+                } catch (Exception e) {//包括jdbc,大忌
                 }
-                    synchronized(innerBlock){
-                        innerBlock.portCount++;
-                        System.out.println(innerBlock.portCount+" "+(startPort-endPort));
-                        oneTask.updateProgress(innerBlock.portCount,innerBlock.IPCount*(endPort-startPort));
+                    synchronized(class4Count){
+                        class4Count.portCount++;
+                        //System.out.println(class4Count.portCount+" "+(startPort-endPort));
+                        oneTask.updateProgress(class4Count.portCount,class4Count.IPCount*(endPort-startPort));
                     }
                 int finalI = i;
-                Platform.runLater(() -> status.setText(String.valueOf(finalI)));//"正在扫描"+
+                Platform.runLater(() -> portStatus.setText(String.valueOf(finalI)));//"正在扫描"+
             }
-            Platform.runLater(() -> status.setText("当前小线程结束"));
+            Platform.runLater(() -> portStatus.setText("当前小线程结束"));
         }
     }
     //扫描Ip地址段查看合法Ip的线程
-    class ScanIp extends Thread{
-        String  Ip ;
+    class ScanIPBlock extends Thread{
+        String  IP ;
         int tagOfIPCount=0;
-        ScanIp(String  Ip ){
-            this.Ip = Ip ;
+        ScanIPBlock(String  IP ){
+            this.IP = IP ;
         }
         public synchronized void run(){
             try {
                 for(int i = startPort;i <= endPort; i++) {
                     //扫描开放的Ip
-                    InetAddress.getByName(Ip);
                     if(tagOfIPCount==0){
-                        innerBlock.IPCount++;
+                        InetAddress.getByName(IP);
+                        class4Count.IPCount++;
                     }
-                    if((i + portOfThread) <= endPort) {
-                        new Scan(i, i + portOfThread,Ip).start();
-                        i += portOfThread;
+                    if((i + portOfPerThread) <= endPort) {
+                        new ScanIP(i, i + portOfPerThread,IP).start();
+                        i += portOfPerThread;
                     }
                     else {
-                        new Scan(i, endPort,Ip).start();
-                        i += portOfThread;
+                        new ScanIP(i, endPort,IP).start();
+                        i += portOfPerThread;
                     }
-                    oneTask.updateTitle(Ip);
+                    oneTask.updateTitle(IP);
                 }
             } catch (Exception e) {
-                System.out.println(Ip+"\n");
+                System.out.println(IP+"\n");
             }
-
         }
     }
     //根据端口号，查询数据库中端口号的相应信息并显示在文本域之中
-    synchronized void findInfoByPort(int port,String Ip){
-        sb.append("-----------------------"+"Ip"+Ip+"的端口号"+port+"------------------------------------"+"\n");
-        Connection conn ;
+    synchronized void queryInDataBase(int port,String IP){
+        sb.append("#####################"+"IP: "+IP+"的端口号: "+port+"########################"+"\n");
+        Connection connection ;
         PreparedStatement pst  ;
         ResultSet rs  ;
-        conn = JdbcUtils.getConnection() ;//与数据库建立连接，获取Connection对象
+        connection = DriverUtils.getConnection() ;//与数据库建立连接，获取Connection对象
         String sql = "Select * from inna where PortNumber ="+port;
         try {
-            pst = conn.prepareStatement(sql) ;
+            pst = connection.prepareStatement(sql) ;
             rs = pst.executeQuery() ;
             while(rs.next()){
                 String transportProtocol=rs.getString("TransportProtocol");
@@ -294,7 +283,10 @@ public class EditorWin extends JFrame {
                 String description = rs.getString("Description") ;
                 if(description.equals("Reserved")||serviceName.equals("Null")){}
                 else{
-                    sb.append("UDP/TCP："+transportProtocol+"\t\t") ;
+                    if(transportProtocol.equals("tcp"))sb.append("UDP/TCP："+transportProtocol+"\t\t") ;
+                    else{
+                        sb.append("UDP/TCP："+transportProtocol+"\t") ;
+                    }
                     sb.append("端口信息："+serviceName+"\t") ;
                     sb.append("端口说明："+description+"\n");
                 }
@@ -304,22 +296,21 @@ public class EditorWin extends JFrame {
         }
     }
     // 判断输入的IP是否合法
-    private boolean checkIP(String str) {
+    private boolean checkLegality(String str) {//字符串里面\要变\\,|的优先级最低
+//        Pattern pattern = Pattern
+//                .compile("^((\\d" +
+//                        "|[1-9]\\d" +
+//                        "|1\\d\\d" +
+//                        "|2[0-4]\\d|" +
+//                        "25[0-5]"
+//                        + "|[*])" +
+//                        "\\.)" +
+//                        "{3}(\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5]|[*])$");
         Pattern pattern = Pattern
-                .compile("^((\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5]"
-                        + "|[*])\\.){3}(\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5]|[*])$");
+                .compile("^((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}$");
         return pattern.matcher(str).matches();
     }
-    //根据Ip获得主机名
-    public static  synchronized String getHostname(String host){
-        InetAddress addr ;
-        try {
-            addr = InetAddress.getByName(host);//todo 域名？
-            return addr.getHostName();
-        } catch (UnknownHostException e) {
-            return "网络不通或您输入的信息无法构造InetAddress对象！";
-        }
-    }
+
     public static void  pop(String string) {
         Label lbl = new Label("Hint！");
         TextArea textArea=new TextArea(string);
@@ -344,28 +335,13 @@ public class EditorWin extends JFrame {
         Stage reflectedStage = (Stage) ((Node) event.getSource()).getScene().getWindow();//【反射】通过event获得当前node然后一路get window
         //fc.showOpenDialog(reflectedStage);
         File saveFile = fc.showSaveDialog(reflectedStage);
-//        String content=message.getText();
-//        FileOutputStream  fileOutStream=new FileOutputStream(saveFile);
-//        try{
-//            fileOutStream.write(content.getBytes());
-//
-//        }catch(IOException ioe){
-//            pop("写入文件错误");
-//        }
-//        finally{
-//    try{
-//        fileOutStream.close();
-//    }catch(IOException ioe2){
-//
-//    }
-//}
         try {
             FileWriter writeOut = new FileWriter(saveFile);
-            writeOut.write(message.getText());
+            writeOut.write(output.getText());
             writeOut.close();
             pop("保存成功!");
         }
-        catch (IOException ex) {
+        catch (Exception ex) {
             pop("保存失败!");
         }
     }
@@ -373,17 +349,22 @@ public class EditorWin extends JFrame {
         BufferedReader br = null;
         try {
             String commands = "nslookup -an";
-            String www = commands + " " + domainName.getText();
-            String commandstr = www;                       //需要调用系统命令符的命令
-            Process p = Runtime.getRuntime().exec(commandstr);  //调用系统命令符
+            String www = commands + " " + domainName.getText();             //需要调用系统命令符的命令
+            Process p = Runtime.getRuntime().exec(www);  //调用系统命令符
             br = new BufferedReader(new InputStreamReader(p.getInputStream()));    //截取命令符返回的信息
             String line = null;
             StringBuilder sb = new StringBuilder();  //字符串变量非线程
+//                while ((line = new String(br.readLine().getBytes(),"gbk")) .equals("")!=false) {
+//                    sb.append(line + "\n");  //如果返回值为空，连接一个字符串到末尾
+//                }
             while ((line = br.readLine()) != null) {
                 sb.append(line + "\n");  //如果返回值为空，连接一个字符串到末尾
             }
-            pop(sb.toString());
-            //jta.setText(jta.getText()+"\n"+"            "+sb.toString());  //把截取的返回值输出到文本域
+            //String ss=new String(br.toString().getBytes(),"GBK"); //转码UTF8
+            String ss=new String(sb.toString().getBytes(),"gbk"); //转码gbk
+            //String ss=new String(sb.toString().getBytes("ISO-8859-1"),"utf-8"); //转码UTF8
+            pop(ss.toString());
+            //pop(sb.toString());
         } catch (Exception ev) {
             ev.printStackTrace();
         } finally {
@@ -397,16 +378,17 @@ public class EditorWin extends JFrame {
             }
         }
     }
+    @FXML void EventOnClear (javafx.event.ActionEvent event) {
+        output.clear();
+        sb.delete(0,sb.length()-1);
+    }
+    @FXML Button cancelScan;
     @FXML void EventOnCancel (javafx.event.ActionEvent event) {
         oneTask.cancel();
         //要终止线程会很麻烦
         if(oneTask.isCancelled()==true){
             pop("成功暂停");
         }
-    }
-    @FXML void EventOnClear (javafx.event.ActionEvent event) {
-        message.clear();
-        sb.delete(0,sb.length()-1);
     }
 }
 
