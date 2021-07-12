@@ -129,14 +129,17 @@ public class UserInterface {
                                             IPStartString.split("\\.")[2];//IP地址根据"."划分成了4块
                                     if(start>end){ updateMessage("请输入正确的Ip地址"); }
                                     else{
+                                        synchronized (Class4Count){
+                                            Class4Count.portCount=0;
+                                            Class4Count.IPCount=0;
+                                        }
                                         for(int i = start;i<=end;i++){
                                             IPSet.add(starts+"."+i) ;    //地海段的每个地址存入集合
                                         }
                                         for (Object str : IPSet) {
-                                            new ScanIPBlock(str.toString()).start() ;
-                                            System.out.println(count*1.0/(end-start));
+                                            new ScanIPBlock(str.toString()).start() ;//System.out.println(count*1.0/(end-start));
                                             updateValue(count*1.0/(end-start));//更新线程进度条用
-                                            count++;
+                                            count++;//System.out.println("count="+count);
                                         }
                                     }
                                 }else{ updateMessage("请输入正确的Ip地址"); }
@@ -207,8 +210,9 @@ public class UserInterface {
                 } catch (Exception e) {  //包括socket和数据库的异常                                                                            //catch Exception 包括jdbc,大忌
                 }
                 synchronized(Class4Count){//锁住并实时更新总的进度条
-                    Class4Count.portCount++;                                                                    //System.out.println(Class4Count.portCount+" "+(startPort-endPort));
+                    Class4Count.portCount++;                                                                    //System.out.println(Class4Count.portCount+" "+Class4Count.IPCount*(startPort-endPort));
                     oneTask.updateProgress(Class4Count.portCount,Class4Count.IPCount*(endPort-startPort));
+                    oneTask.updateTitle(IP);
                 }
                 int finalI = i;
                 Platform.runLater(() -> portStatus.setText(String.valueOf(finalI)));
@@ -223,13 +227,16 @@ public class UserInterface {
         ScanIPBlock(String  IP ){
             this.IP = IP ;
         }
-        public synchronized void run(){
-            //public synchronized void run(){
+        //public  void run(){
+            public synchronized void run(){
             try {
                 for(int i = startPort;i <= endPort;i += portOfPerThread) {
                     if(tagOfIPCount==0){                    //扫描开放的Ip
-                        if(InetAddress.getByName(IP).isReachable(1000)){
-                            Class4Count.IPCount++;
+                        if(InetAddress.getByName(IP).isReachable(3000)){
+                            synchronized (UserInterface.Class4Count){
+                                Class4Count.IPCount++;
+                            }
+                            tagOfIPCount++;
                         }
                         else return;
                     }
@@ -239,7 +246,7 @@ public class UserInterface {
                     else {
                         new ScanIP(i, endPort,IP).start();
                     }
-                    oneTask.updateTitle(IP);
+                    //oneTask.updateTitle(IP);
                 }
             } catch (Exception e) {
                 System.out.println(IP+"\n");

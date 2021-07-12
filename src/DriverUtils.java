@@ -12,7 +12,7 @@ import java.sql.*;
 //private static final String url = "jdbc:mysql://localhost:3306/iana_default?useUnicode=true&characterEncoding=utf8";
 //    private static final String url= "jdbc:mysql://localhost:3306/iana_default?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;serverTimezone=GMT";
 public final class DriverUtils {
-    private static final String url= "jdbc:mysql://localhost:3306/iana_default?useUnicode=true&characterEncoding=UTF-8&useSSL=false&ServerTimezone=UTC";
+    private static final String url= "jdbc:mysql://localhost:3306/iana_default?useUnicode=true&characterEncoding=UTF-8&useSSL=false&ServerTimezone=UTC&allowPublicKeyRetrieval=true";
     private static final String user = "root";
     private static final String passWord = "123456";
     private static  Connection connection;
